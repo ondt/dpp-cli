@@ -1,4 +1,5 @@
 import json
+import math
 import re
 import time
 from typing import List, Tuple
@@ -56,7 +57,7 @@ class DPP(object):
 		return results[0] if len(results) > 0 else query
 
 
-	def query_connection(self, src: str, dst: str, via: str = "") -> Tuple[str, List[Connection]]:
+	def query_connection(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
 		src = self.normalize(src)
 		dst = self.normalize(dst)
 
@@ -66,20 +67,37 @@ class DPP(object):
 			"ctlTo$txtObject":   dst,
 			"ctlVia$txtObject":  via,
 
-			# "txtDate":           "1.5.2019",  # kdyz neni, tak se najde to nejaktualnejsi
-			# "txtTime":           "17:14",  # kdyz neni, tak se najde to nejaktualnejsi
+			# "txtDate":           "1.5.2019",  # kdyz neni, tak se najde to nejaktualnejsi  # todo: arg
+			# "txtTime":           "17:14",  # kdyz neni, tak se najde to nejaktualnejsi  # todo: arg
+
 			"Direction":         "optDeparture",
 			"Changes":           "optChanges",
-			"cboChanges":        4,
+			"cboChanges":        4,  # todo: arg
 			"cmdSearch":         "vyhledat",
 		}
 
-		res = self.http.post("http://spojeni.dpp.cz/", form)
+		tree = None
+		connections_received = 0
+		est_conn_count = math.ceil(num / 3) * 3
 
-		if "Vyskytl se problém" in res.text:
-			print("ERROR!!! " * 100)
+		while connections_received < num:
+			if connections_received == 0:
+				res = self.http.post("http://spojeni.dpp.cz/", form)  # the 1st request
+			else:
+				next_url = tree.cssselect("#ctlPaging_ctlPaging > a:contains('následující')")[0].attrib["href"]
+				res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")  # following requests
 
-		tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))
+			assert "frmResult" in res.text, "unknown response received"
+
+			tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # the last one will remain
+			connections_received = len(tree.cssselect(".spojeni"))  # todo: optimize
+			print(f"\rloading... {round(connections_received / est_conn_count * 100)}% ", end="")
+
+		print("\r", " " * 15, end="\r")  # cleanup
+
+		# ---------------------------------------------------------------- #
+
+
 		result = tree.cssselect("#frmResult")[0]
 
 		title = result.cssselect("h1")[0].text
@@ -140,12 +158,12 @@ class DPP(object):
 								print("\033[31m", end="")  # red
 
 						# print(f"\t{vehicle} ({vehicle_type})   \t {start_time} - {end_time}    \t {start} --> {end}")
-						print(f"\t{vehicle:<14} {start_time} - {end_time}       {start} --> {end}")
+						print(f"\t{vehicle:<14} {start_time:0>5} - {end_time:0>5}       {start} --> {end}")  # todo zvyraznit start a end
 
 						print("\033[0m", end="")
 
 					if step.attrib["class"] == "walk":
-						print(f"\t{step.text.strip().lower()}")
+						print(f"\t{step.text.strip().lower()}")  # x minut na prestup
 
 					if step.attrib["class"] == "note":
 						pass
@@ -154,5 +172,8 @@ class DPP(object):
 					pass
 
 			connections.append(connection)
+
+			if len(connections) >= num:
+				break
 
 		return title, connections
