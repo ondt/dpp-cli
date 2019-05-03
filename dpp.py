@@ -4,16 +4,15 @@ import argparse
 from core.web import DPP
 
 
-parser = argparse.ArgumentParser(description='Process some integers.')
-
+parser = argparse.ArgumentParser(description="Find connections for Prague public transport.")
 parser.add_argument("start", type=str,
                     help="the starting station")
-parser.add_argument("via", type=str, nargs='?', default="",
-                    help='via (optional)')
+parser.add_argument("via", type=str, nargs="?", default="",
+                    help="via (optional)")
 parser.add_argument("end", type=str,
-                    help='the final station')
+                    help="the final station")
 parser.add_argument("-n", type=int, default=3, metavar="NUMBER",
-                    help='number of connections for search')
+                    help="number of connections for search (default = 3)")
 
 args = parser.parse_args()
 
