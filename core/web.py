@@ -105,9 +105,10 @@ class DPP(object):
 
 		connections: List[Connection] = []
 
-		for datetime, steps in zip(result.cssselect(".souhrn-spojeni .date"), result.cssselect(".spojeni")):
+		# for datetime, steps in zip(result.cssselect(".souhrn-spojeni .date"), result.cssselect(".spojeni")):
+		for steps in result.cssselect(".spojeni"):
 			connection = Connection()
-			connection.datetime = datetime.text
+			# connection.datetime = datetime.text
 			print()
 
 			for step in steps.getchildren():

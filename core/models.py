@@ -14,7 +14,7 @@ class RideStep(Step):
 
 
 class Connection(object):
-	datetime: str = ""
+	# datetime: str = ""
 	summary: str = ""
 
 	steps: List[Step] = []
