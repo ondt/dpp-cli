@@ -1,3 +1,4 @@
+cursor
 lxml
 requests
 cssselect
