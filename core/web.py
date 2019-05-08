@@ -3,7 +3,7 @@ import math
 import re
 import time
 from typing import List, Tuple
-
+import cursor
 import requests
 from lxml import html
 
@@ -78,22 +78,28 @@ class DPP(object):
 
 		tree = None
 		connections_received = 0
-		est_conn_count = math.ceil(num / 3) * 3
 
-		while connections_received < num:
-			if connections_received == 0:
-				res = self.http.post("http://spojeni.dpp.cz/", form)  # the 1st request
-			else:
-				next_url = tree.cssselect("#ctlPaging_ctlPaging > a:contains('následující')")[0].attrib["href"]
-				res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")  # following requests
+		try:
+			cursor.hide()
+			print(f"loading... 0% ", end="\r")
 
-			assert "frmResult" in res.text, "unknown response received"
+			while connections_received < num:
+				if connections_received == 0:
+					res = self.http.post("http://spojeni.dpp.cz/", form)  # the 1st request
+				else:
+					next_url = tree.cssselect("#ctlPaging_ctlPaging > a:contains('následující')")[0].attrib["href"]
+					res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")  # following requests
 
-			tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # the last one will remain
-			connections_received = len(tree.cssselect(".spojeni"))  # todo: optimize
-			print(f"\rloading... {round(connections_received / est_conn_count * 100)}% ", end="")
+				assert "frmResult" in res.text, "unknown response received"
 
-		print("\r", " " * 15, end="\r")  # cleanup
+				tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # the last one will remain
+				connections_received = len(tree.cssselect(".spojeni"))  # todo: optimize
+				print(f"loading... {round(connections_received / (math.ceil(num / 3) * 3) * 100)}% ", end="\r")
+
+		finally:
+			cursor.show()
+
+		print(" " * 16, end="\r")  # cleanup
 
 		# ---------------------------------------------------------------- #
 
