@@ -7,7 +7,7 @@ from typing import List, Tuple
 import requests
 from lxml import html
 
-from core.models import Connection
+from core.models import Connection, RideStep, WalkStep
 
 
 
@@ -101,22 +101,18 @@ class DPP(object):
 		result = tree.cssselect("#frmResult")[0]
 
 		title = result.cssselect("h1")[0].text
-		print(title)
-
 		connections: List[Connection] = []
 
 		# for datetime, steps in zip(result.cssselect(".souhrn-spojeni .date"), result.cssselect(".spojeni")):
 		for steps in result.cssselect(".spojeni"):
 			connection = Connection()
 			# connection.datetime = datetime.text
-			print()
 
 			for step in steps.getchildren():
 				if step.tag == "h3":
 					strong = list(step.cssselect("strong")[0].itertext())
 					h3 = list(step.itertext())
-					connection.summary = f"{strong[0].strip()} - {strong[-1].strip()}, {h3[-1].strip()}"
-					print(f"\033[1m{connection.summary}\033[0m")
+					connection.summary = f"{strong[0].strip()} - {strong[-1].strip()}, {h3[-2].strip()} {h3[-1].strip()}"
 
 				if step.tag == "p":
 					if step.attrib["class"] == "usek":
@@ -135,36 +131,16 @@ class DPP(object):
 
 						# end = "".join(list(end.itertext())[1:-1]).strip()
 
-						start, start_time = [x.strip() for x in start.rsplit(",", 1)]
-						end, end_time = [x.strip() for x in end.rsplit(",", 1)]
+						start_place, start_time = [x.strip() for x in start.rsplit(",", 1)]
+						end_place, end_time = [x.strip() for x in end.rsplit(",", 1)]
 
 						vehicle_type = vehicle.cssselect("a > img")[0].attrib["src"][4:-6]
 						vehicle = "".join([x for x in vehicle.cssselect("a")[0].itertext() if x != "é"]).strip()
 
-						# print(f"\t{vehicle} ({vehicle_type})")
-						# print(f"\t\t{start} ({start_time}) --> {end} ({end_time})")
-
-						if vehicle_type == "bus":
-							print("\033[34m", end="")  # blue
-						if vehicle_type == "train":
-							print("\033[34m", end="")  # blue
-						if vehicle_type == "tram":
-							print("\033[91m", end="")  # red
-						if vehicle_type == "metro":
-							if "A" in vehicle:
-								print("\033[32m", end="")  # green
-							if "B" in vehicle:
-								print("\033[33m", end="")  # yellow
-							if "C" in vehicle:
-								print("\033[31m", end="")  # red
-
-						# print(f"\t{vehicle} ({vehicle_type})   \t {start_time} - {end_time}    \t {start} --> {end}")
-						print(f"\t{vehicle:<14} {start_time:0>5} - {end_time:0>5}       {start} --> {end}")  # todo zvyraznit start a end
-
-						print("\033[0m", end="")
+						connection.steps.append(RideStep(vehicle_type, vehicle, start_time, end_time, start_place, end_place))
 
 					if step.attrib["class"] == "walk":
-						print(f"\t{step.text.strip().lower()}")  # x minut na prestup
+						connection.steps.append(WalkStep(text=step.text.strip().lower()))
 
 					if step.attrib["class"] == "note":
 						pass
