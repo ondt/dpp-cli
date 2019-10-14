@@ -2,7 +2,7 @@
 dpp.cz command line interface
 
 ## Installation
-```console
+```bash
 sudo apt install git python3 python3-pip python3-venv  # python 3.6+, ideally
 git clone https://github.com/ondt/dpp-cli
 cd dpp-cli/
@@ -21,15 +21,15 @@ python3 server.py
 
 ## Usage
 Malostranská - Křižíkova
-```console
+```bash
 python3 dpp.py malostranska krizikova
 ```
 Křižíkova - Vyšehrad
-```console
+```bash
 python3 dpp.py kriz vyse
 ```
 Webserver startup
-```console
+```bash
 python3 server.py
 ```
 
