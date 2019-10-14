@@ -11,11 +11,7 @@ python3 -m venv venv
 source venv/bin/activate  # posix shell
 pip install -r requirements.txt
 
-# cli...
-python3 dpp.py malostranska krizikova
-
-# ...or webserver
-python3 server.py
+# proceed to the "Usage"
 ```
 
 
