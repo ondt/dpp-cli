@@ -1,8 +1,10 @@
+import datetime
 import json
 import math
 import re
 import time
 from typing import List, Tuple
+
 import cursor
 import requests
 from lxml import html
@@ -23,7 +25,7 @@ class DPP(object):
 
 
 	def remember_asp_state(self, res):
-		tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))
+		tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # todo: optimize
 
 		for x in tree.cssselect('input[name^=__]'):  # all the asp tags
 			self.asp_current_state[x.name] = x.value
@@ -54,12 +56,13 @@ class DPP(object):
 
 	def normalize(self, query: str):
 		results = self.autocomplete(query)
-		return results[0] if len(results) > 0 else query
+		return results[0] if len(results) > 0 else query  # todo: exception
+
 
 
 	def query_connection(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
-		src = self.normalize(src)
-		dst = self.normalize(dst)
+		src = self.normalize(src.replace("_", " "))
+		dst = self.normalize(dst.replace("_", " "))
 
 		form = {
 			**self.asp_current_state,
@@ -101,7 +104,7 @@ class DPP(object):
 
 		print(" " * 16, end="\r")  # cleanup
 
-		# ---------------------------------------------------------------- #
+		# ------ parse ---------------------------------------------------------- #
 
 
 		result = tree.cssselect("#frmResult")[0]
@@ -120,11 +123,21 @@ class DPP(object):
 					h3 = list(step.itertext())
 					connection.summary = f"{strong[0].strip()} - {strong[-1].strip()}, {h3[-2].strip()} {h3[-1].strip()}"
 
+					def parse_time(time24: str) -> int:
+						h, m = time24.split(":")
+						sec = int(h) * 3600 + int(m) * 60
+						return sec
+
+					connection.time_from = parse_time(strong[0].strip())
+					connection.time_to = parse_time(strong[-1].strip())
+					connection.transfers = int(h3[-2].strip().split()[0])
+					connection.duration = connection.time_to - connection.time_from + (86400 if connection.time_to < connection.time_from else 0)  # midnight correction
+
 				if step.tag == "p":
 					if step.attrib["class"] == "usek":
 						start, vehicle, end = step.getchildren()[:-1]
 
-						# TODO: ?????????????
+						# TODO: ????????????? rm!
 						if len(list(start.itertext())) == 4:
 							start = "".join([list(start.itertext())[1], list(start.itertext())[3]]).strip()
 						else:
@@ -143,6 +156,9 @@ class DPP(object):
 						vehicle_type = vehicle.cssselect("a > img")[0].attrib["src"][4:-6]
 						vehicle = "".join([x for x in vehicle.cssselect("a")[0].itertext() if x != "é"]).strip()
 
+						start_place = start_place.replace("  ", " ")
+						end_place = end_place.replace("  ", " ")
+
 						connection.steps.append(RideStep(vehicle_type, vehicle, start_time, end_time, start_place, end_place))
 
 					if step.attrib["class"] == "walk":
@@ -160,3 +176,19 @@ class DPP(object):
 				break
 
 		return title, connections
+
+
+
+	def stats(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, int, Connection, Connection, datetime.timedelta, datetime.timedelta, datetime.timedelta]:
+		title, connections = self.query_connection(src, dst, via, num)
+
+		durations = [c.duration for c in connections]
+
+		min_time = datetime.timedelta(seconds=min(durations))
+		max_time = datetime.timedelta(seconds=max(durations))
+		avg_time = datetime.timedelta(seconds=round(sum(durations) / len(durations)))
+
+		best_conn = min(connections, key=lambda c: c.duration)
+		worst_conn = max(connections, key=lambda c: c.duration)
+
+		return title, len(connections), best_conn, worst_conn, min_time, max_time, avg_time
