@@ -3,9 +3,87 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>DPP</title>
+		<link href="https://ondrej.xyz/assets/main-solarized.css" rel="stylesheet" type="text/css">
+
+		<style>
+			input#input {
+				background-color: #073642;
+				font-size: 1rem;
+				border: none;
+				width: 100%;
+				padding: 12px 20px;
+				margin: 8px 0;
+			}
+
+			input#input:before {
+				content: "$";
+			}
+		</style>
+
 	</head>
 	<body>
-		Henlo
-		
+		<h1>DPP CLI</h1>
+
+		<h2>Links</h2>
+		<ul>
+			<li><a href="https://github.com/ondt/dpp-cli">GitHub</a></li>
+		</ul>
+
+		<h2>Help</h2>
+		<pre style="margin-bottom: 24px">usage: dpp [-h] [-n NUMBER] [-f FORMAT] [-s] start [via] end
+
+Find connections for Prague public transport.
+
+positional arguments:
+  start        the starting station
+  via          via (optional)
+  end          the final station
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -n NUMBER    number of connections for search (default n = 3)
+  -f FORMAT    output format (pretty, json, pdf) (default = pretty)
+  -s, --stats  print connection statistics (default n = 32)</pre>
+
+
+		<h2>Input</h2>
+		<input id="input" value="$ dpp " style="margin-bottom: 24px">
+
+
+		<h2>Output</h2>
+		<p id="output">no output</p>
+
+
+		<script>
+			const prefix = "$ dpp ";
+
+			const input = document.getElementById("input");
+			input.focus();
+			input.value = prefix;
+			setTimeout(function () {
+				input.selectionStart = input.selectionEnd = prefix.length;
+			}, 0);
+
+
+			input.addEventListener("keyup", (e) => {
+				input.value = prefix + input.value.slice(6);  // was inside oninput
+
+				if (input.selectionStart < prefix.length) {
+					setTimeout(function () {
+						input.selectionStart = input.selectionEnd = prefix.length;
+					}, 0);
+				}
+
+				if (e.code === "Enter") {
+					parse(input.value.substring(6));
+				}
+			});
+
+			function parse(line) {
+				console.log(line)
+			}
+
+		</script>
+
 	</body>
 </html>
