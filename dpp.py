@@ -3,7 +3,7 @@ import argparse
 
 from core.web import DPP
 
-# sys.argv = [sys.argv[0], "mustek", "vltavska", "--stats"]  # todo debug
+
 
 parser = argparse.ArgumentParser(description="Find connections for Prague public transport.")
 parser.add_argument("start", type=str, help="the starting station")
@@ -14,42 +14,43 @@ parser.add_argument("-f", type=str, default="pretty", metavar="FORMAT", help="ou
 parser.add_argument("-s", "--stats", action="store_true", help="print connection statistics (default n = 32)")  # todo: next hour, not n connections
 args = parser.parse_args()
 
-# ------------------------------------------------------------------------------ #
+##########################################################
 
-dpp = DPP()
+if __name__ == '__main__':
+	dpp = DPP()
 
-# default n
-if args.n is None:
-	args.n = 32 if args.stats else 3
+	# default n
+	if args.n is None:
+		args.n = 32 if args.stats else 3
 
-if not args.stats:
-	title, connections = dpp.query_connection(src=args.start, dst=args.end, via=args.via, num=args.n)
+	if not args.stats:
+		title, connections = dpp.query_connection(src=args.start, dst=args.end, via=args.via, num=args.n)
 
-	print(title)
-	print()
+		print(title)
+		print()
 
-	print(dpp.render_conn2str(connections))
+		print(dpp.render_conn2str(connections))
 
 
-else:
-	title, connections, best_conn, worst_conn, min_time, max_time, avg_time = dpp.stats(src=args.start, dst=args.end, via=args.via, num=args.n)
+	else:
+		title, connections, best_conn, worst_conn, min_time, max_time, avg_time = dpp.stats(src=args.start, dst=args.end, via=args.via, num=args.n)
 
-	print(title)
-	print()
+		print(title)
+		print()
 
-	print(f"connections: {connections}")
-	print(f"min time: {min_time}")
-	print(f"max time: {max_time}")
-	print(f"avg time: {avg_time}")
+		print(f"connections: {connections}")
+		print(f"min time: {min_time}")
+		print(f"max time: {max_time}")
+		print(f"avg time: {avg_time}")
 
-	print()
-	print(f"best connection:")
-	print(f"\033[1m{best_conn.summary}\033[0m")
-	for step in best_conn.steps:
-		print(f"\t{step}")
+		print()
+		print(f"best connection:")
+		print(f"\033[1m{best_conn.summary}\033[0m")
+		for step in best_conn.steps:
+			print(f"\t{step}")
 
-	print()
-	print(f"worst connection:")
-	print(f"\033[1m{worst_conn.summary}\033[0m")
-	for step in worst_conn.steps:
-		print(f"\t{step}")
+		print()
+		print(f"worst connection:")
+		print(f"\033[1m{worst_conn.summary}\033[0m")
+		for step in worst_conn.steps:
+			print(f"\t{step}")
