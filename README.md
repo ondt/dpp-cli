@@ -18,7 +18,7 @@ pip install -r requirements.txt
 ## Usage
 Malostranská - Křižíkova
 ```bash
-python3 dpp.py malostranska krizikova
+python3 dpp.py malostranska namesti_miru
 ```
 Křižíkova - Vyšehrad
 ```bash
