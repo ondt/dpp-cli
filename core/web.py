@@ -221,9 +221,9 @@ class DPP(object):
 				"transfers": c.transfers,
 				"steps":     [
 					{
+						"type":         "ride",
 						"vehicle_type": s.vehicle_type,
 						"vehicle":      s.vehicle,
-						"type":         "ride",
 						"start_time":   s.start_time,
 						"start_place":  s.start_place,
 						"end_time":     s.end_time,
