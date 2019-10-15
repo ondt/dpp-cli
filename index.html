@@ -191,7 +191,7 @@ optional arguments:
 				}
 
 				let xhr = new XMLHttpRequest();
-				xhr.open('GET', 'http://dpp.ondrej.xyz/argparse/' + line);
+				xhr.open('GET', '/argparse/' + line);
 				xhr.send();
 				xhr.onload = function () {
 					if (xhr.status !== 200) {
