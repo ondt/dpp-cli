@@ -17,7 +17,7 @@ def index():
 
 
 @hug.get()
-def connections(start: str, end: str, via: str = "", num: int = 12):
+def connections(start: str, end: str, via: str = "", num: int = 3):
 	dpp = DPP()
 	title, connections = dpp.query_connection(src=start, dst=end, via=via, num=num)
 
