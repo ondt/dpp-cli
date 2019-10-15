@@ -90,7 +90,11 @@ class DPP(object):
 				if connections_received == 0:
 					res = self.http.post("http://spojeni.dpp.cz/", form)  # the 1st request
 				else:
-					next_url = tree.cssselect("#ctlPaging_ctlPaging > a:contains('následující')")[0].attrib["href"]
+					el = tree.cssselect("#ctlPaging_ctlPaging > a:contains('následující')")  # no následující for the next day
+					if not el:
+						break
+
+					next_url = el[0].attrib["href"]
 					res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")  # following requests
 
 				assert "frmResult" in res.text, "unknown response received"
