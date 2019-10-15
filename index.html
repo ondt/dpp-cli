@@ -9,7 +9,7 @@
 			html {
 				overflow-y: scroll;
 			}
-			
+
 			section {
 				margin-bottom: 24px;
 			}
@@ -56,20 +56,48 @@
 		</style>
 
 		<style>
-			span.key, .blue {
+			span.key, .blue, .bus, .train {
 				color: #268bd2;
 			}
 
-			span.string, .green {
+			span.string, .green, .metroA {
 				color: #859900;
 			}
 
-			span.number, .orange, div#prompt > input {
+			span.number, .yellow, div#prompt > input, .metroB {
 				color: #b58900;
 			}
 
-			span.boolean, span.null, .red {
+			.orange, .tram {
+				color: #cb4b16;
+			}
+
+			span.boolean, span.null, .red, .metroC {
 				color: #dc322f;
+			}
+		</style>
+
+		<style>
+			span.title {
+				margin-top: 8px;
+			}
+
+
+			span.summary {
+				font-weight: bold;
+			}
+
+			div.connection {
+				margin-bottom: 16px;
+			}
+
+			div.connection > ol {
+				margin: 0;
+				padding-left: 3rem;
+			}
+
+			div.connection > ol > li {
+				list-style-type: none;
 			}
 		</style>
 
@@ -122,15 +150,30 @@ optional arguments:
 		<section>
 			<h2>Output</h2>
 			<pre id="output">No output</pre>
+
+			<div id="pretty_container" style="margin-top: 16px;">
+				<!--<div class="connection">-->
+				<!--	<span class="summary">18:27 - 18:42, 1 přestup, 15 min</span>-->
+				<!--	<ol>-->
+				<!--		<li class="yellow">Metro B 18:27 - 18:29 Karlovo náměstí &ndash;&gt; Můstek</li>-->
+				<!--		<li>asd</li>-->
+				<!--		<li>asd</li>-->
+				<!--		<li>asd</li>-->
+				<!--	</ol>-->
+				<!--</div>-->
+			</div>
 		</section>
 
 
 		<script>
+			const nbsp = "\xa0";
+
 			const prefix_base = "$ python dpp.py";
 
 			const prefix = document.getElementById("prefix");
 			const input = document.getElementById("prompt_input");
 			const output = document.getElementById("output");
+			const pretty_container = document.getElementById("pretty_container");
 			const num = document.getElementById("number");
 			const format = document.getElementById("format");
 			input.focus();
@@ -160,15 +203,16 @@ optional arguments:
 						format.innerText = "json";
 						prefix_format = "-f json";
 						break;
-					case "json":
-						format.innerText = "pdf";
-						prefix_format = "-f pdf";
-						break;
 
-					case "pdf":
+					case "json":
 						format.innerText = "pretty";
 						prefix_format = "";
 						break;
+
+					// case "pdf":
+					// 	format.innerText = "pretty";
+					// 	prefix_format = "";
+					// 	break;
 
 				}
 
@@ -187,6 +231,8 @@ optional arguments:
 
 			function fetch(line) {
 				output.innerText = "Loading...";
+				pretty_container.innerHTML = ""; // clear
+				pretty_container.style.display = "none";
 
 				line = line.trim();
 				if (line.length === 0) {
@@ -202,8 +248,71 @@ optional arguments:
 						output.innerText = `Error ${xhr.status}: ${xhr.statusText}`  // e.g. 404: Not Found
 					} else {
 						let json = JSON.parse(xhr.responseText);
-						delete json["args"];
-						output.innerHTML = syntaxHighlight(json)
+
+						if ("help" in json) {
+							output.innerText = json["help"];
+						} else if ("error" in json) {
+							output.innerHTML = "";
+							let err = document.createElement("SPAN");
+							err.className = "red";
+							err.innerText = "Error: " + json["error"];
+							output.appendChild(err)
+						} else {
+							switch (json["args"]["format"]) {
+								case "pretty":
+									for (const conn of json["connections"]) {
+										let wrapper = document.createElement("DIV");
+										wrapper.className = "connection";
+
+										let summary = document.createElement("SPAN");
+										summary.className = "summary";
+										summary.innerText = conn["summary"];
+										wrapper.appendChild(summary);
+
+										let ol = document.createElement("OL");
+										for (const step of conn["steps"]) {
+											let li = document.createElement("LI");
+
+											if (step["type"] === "ride") {
+												const vehicle_type = step["vehicle_type"];
+												const vehicle = step["vehicle"];
+
+												if (["bus", "train", "tram"].includes(vehicle_type)) {
+													li.className = vehicle_type;
+												} else {
+													li.className = "metro" + vehicle.charAt(6);
+												}
+
+												li.innerText = `${step["vehicle"].toString().padEnd(12, nbsp)} ${step["start_time"]} - ${step["end_time"]} ${nbsp + nbsp} ${step["start_place"]} --> ${step["end_place"]}`;
+
+											} else {  // type: walk
+												li.className = "walk";
+												li.innerText = step["text"];
+											}
+
+											ol.appendChild(li);
+										}
+										wrapper.appendChild(ol);
+										pretty_container.appendChild(wrapper);
+									}
+									pretty_container.style.display = "block";
+									output.innerText = json["title"];
+									break;
+
+								case "json":
+									delete json["args"];
+									output.innerHTML = syntaxHighlight(json);
+									pretty_container.style.display = "none";
+									break;
+
+								// case "pdf":
+								// 	delete json["args"];
+								// 	output.innerHTML = syntaxHighlight(json);
+								// 	pretty_container.style.display = "none";
+								// 	break;
+
+							}
+						}
 					}
 				};
 
