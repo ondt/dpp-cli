@@ -2,6 +2,8 @@ import eventlet.wsgi
 import hug.api
 from hug.middleware import CORSMiddleware
 
+from core.web import DPP
+
 
 hug_api = hug.API(__name__)
 hug_api.http.add_middleware(CORSMiddleware(hug_api))  # disable CORS
@@ -14,10 +16,14 @@ def index():
 
 
 
-@hug.get("/api/something")
-def something():
+@hug.get()
+def connections(start: str, end: str, via: str = "", num: int = 12):
+	dpp = DPP()
+	title, connections = dpp.query_connection(src=start, dst=end, via=via, num=num)
+
 	return {
-		"some": "json",
+		"title":       title,
+		"connections": dpp.render_conn2json(connections),
 	}
 
 

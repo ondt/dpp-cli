@@ -28,13 +28,8 @@ if not args.stats:
 	print(title)
 	print()
 
-	for connection in connections:
-		print(f"\033[1m{connection.summary}\033[0m")
+	print(dpp.render_conn2str(connections))
 
-		for step in connection.steps:
-			print(f"\t{step}")
-
-		print()
 
 else:
 	title, connections, best_conn, worst_conn, min_time, max_time, avg_time = dpp.stats(src=args.start, dst=args.end, via=args.via, num=args.n)

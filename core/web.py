@@ -192,3 +192,50 @@ class DPP(object):
 		worst_conn = max(connections, key=lambda c: c.duration)
 
 		return title, len(connections), best_conn, worst_conn, min_time, max_time, avg_time
+
+
+
+	@staticmethod
+	def render_conn2str(connections: List[Connection]):
+		output = ""
+		for connection in connections:
+			output += f"\033[1m{connection.summary}\033[0m\n"
+
+			for step in connection.steps:
+				output += f"\t{step}\n"
+
+			output += "\n"
+
+		return output
+
+
+
+	@staticmethod
+	def render_conn2json(connections: List[Connection]) -> List[dict]:
+		return [
+			{
+				"summary":   c.summary,
+				"time_from": c.time_from,
+				"time_to":   c.time_to,
+				"duration":  c.duration,
+				"transfers": c.transfers,
+				"steps":     [
+					{
+						"vehicle_type": s.vehicle_type,
+						"vehicle":      s.vehicle,
+						"type":         "ride",
+						"start_time":   s.start_time,
+						"start_place":  s.start_place,
+						"end_time":     s.end_time,
+						"end_place":    s.end_place,
+					}
+					if isinstance(s, RideStep) else
+					{
+						"type": "walk",
+						"text": s.text,
+					}
+					for s in c.steps
+				]
+
+			} for c in connections
+		]
