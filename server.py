@@ -53,6 +53,11 @@ def argparse(args: str):
 	if args.n is None:
 		args.n = 32 if args.stats else 3
 
+	if not 0 < args.n <= 64:
+		return {
+			"error": "number must be in range: 0 < number <= 64"
+		}
+
 	# todo: stats, format
 
 	return {
