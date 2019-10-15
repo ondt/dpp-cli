@@ -76,3 +76,4 @@ def argparse(args: str):
 
 # start the server
 eventlet.wsgi.server(eventlet.listen(addr=("localhost", 8001)), hug_api.http.server(), log_output=True)
+# todo: https://fgimian.github.io/blog/2018/05/17/choosing-a-fast-python-api-framework/
