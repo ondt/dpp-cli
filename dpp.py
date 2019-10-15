@@ -4,8 +4,12 @@ import argparse
 from core.web import DPP
 
 
+class ArgumentParser(argparse.ArgumentParser):
+	def error(self, message):
+		raise argparse.ArgumentError(None, message)
 
-parser = argparse.ArgumentParser(description="Find connections for Prague public transport.")
+
+parser = ArgumentParser(description="Find connections for Prague public transport.")
 parser.add_argument("start", type=str, help="the starting station")
 parser.add_argument("via", type=str, nargs="?", default="", help="via (optional)")
 parser.add_argument("end", type=str, help="the final station")
