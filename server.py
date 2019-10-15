@@ -1,9 +1,12 @@
+from argparse import ArgumentError
+
 import eventlet.wsgi
 import hug.api
 from hug.middleware import CORSMiddleware
 
 from core.web import DPP
 from dpp import parser
+
 
 
 hug_api = hug.API(__name__)
@@ -20,7 +23,11 @@ def index():
 @hug.get()
 def connections(start: str, end: str, via: str = "", num: int = 3):
 	dpp = DPP()
-	title, conns = dpp.query_connection(src=start, dst=end, via=via, num=num)
+
+	try:
+		title, conns = dpp.query_connection(src=start, dst=end, via=via, num=num)
+	except AssertionError:
+		title, conns = "No connections found", []
 
 	return {
 		"title":       title,
@@ -31,7 +38,16 @@ def connections(start: str, end: str, via: str = "", num: int = 3):
 
 @hug.get("/argparse/{args}")
 def argparse(args: str):
-	args = parser.parse_args(args.strip().split())
+	try:
+		args = parser.parse_args(args.strip().split())
+	except ArgumentError as e:
+		return {
+			"error": str(e)
+		}
+	except SystemExit:
+		return {
+			"help": parser.format_help(),
+		}
 
 	# default n
 	if args.n is None:
@@ -43,7 +59,7 @@ def argparse(args: str):
 		"args": {
 			"start":  args.start,
 			"end":    args.end,
-			"via":    args.via,
+			"via":    args.via if args.via else None,
 			"num":    args.n,
 			"format": args.f,
 			"stats":  args.stats,
