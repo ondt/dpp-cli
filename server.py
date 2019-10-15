@@ -8,9 +8,9 @@ hug_api.http.add_middleware(CORSMiddleware(hug_api))  # disable CORS
 
 
 
-@hug.get("/")
+@hug.get("/", output=hug.output_format.file)
 def index():
-	return "some html"
+	return "index.html"
 
 
 
