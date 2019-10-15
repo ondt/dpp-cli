@@ -12,12 +12,12 @@ parser.add_argument("end", type=str, help="the final station")
 parser.add_argument("-n", type=int, metavar="NUMBER", help="number of connections for search (default n = 3)")  # default=3
 parser.add_argument("-f", type=str, default="pretty", metavar="FORMAT", help="output format (pretty, json, pdf) (default = pretty)")  # todo: choose
 parser.add_argument("-s", "--stats", action="store_true", help="print connection statistics (default n = 32)")  # todo: next hour, not n connections
-args = parser.parse_args()
 
 ##########################################################
 
 if __name__ == '__main__':
 	dpp = DPP()
+	args = parser.parse_args()
 
 	# default n
 	if args.n is None:
