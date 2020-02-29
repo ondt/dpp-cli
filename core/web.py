@@ -243,20 +243,20 @@ class DPP:
 	def connections_to_json(connections: List[Connection]) -> List[dict]:
 		return [
 			{
-				"summary":   str(c),
 				"time_from": c.time_from,
 				"time_to":   c.time_to,
 				"duration":  c.duration,
-				"transfers": c.transfers,
 				"steps":     [
 					{
-						"type":         "ride",
-						"vehicle_type": s.vehicle_type,
-						"vehicle":      s.vehicle,
-						"start_time":   s.start_time,
-						"start_place":  s.start_place,
-						"end_time":     s.end_time,
-						"end_place":    s.end_place,
+						"type":        "ride",
+						"vehicle":     {
+							"type": s.vehicle_type,
+							"line": s.vehicle,
+						},
+						"start_time":  s.start_time,
+						"start_place": s.start_place,
+						"end_time":    s.end_time,
+						"end_place":   s.end_place,
 					}
 					if isinstance(s, RideStep) else
 					{
