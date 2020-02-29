@@ -50,6 +50,6 @@ optional arguments:
 
 
 ## Output
-<img src="https://user-images.githubusercontent.com/20520951/75614314-cda9af00-5b37-11ea-82cf-db3009d36966.png" width="50%">
-<img src="https://user-images.githubusercontent.com/20520951/75614376-5fb1b780-5b38-11ea-8158-d5f92c3755bd.png" width="50%">
+<img src="https://user-images.githubusercontent.com/20520951/75614314-cda9af00-5b37-11ea-82cf-db3009d36966.png" width="471">
+<img src="https://user-images.githubusercontent.com/20520951/75614376-5fb1b780-5b38-11ea-8158-d5f92c3755bd.png" width="625">
 
