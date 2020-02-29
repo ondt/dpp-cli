@@ -233,7 +233,7 @@ class DPP:
 	def render_conn2str(connections: List[Connection]):
 		output = ""
 		for connection in connections:
-			output += f"\033[1m{connection.summary}\033[0m\n"
+			output += f"\033[1m{connection}\033[0m\n"
 
 			for step in connection.steps:
 				output += f"\t{step}\n"
@@ -248,7 +248,7 @@ class DPP:
 	def render_conn2json(connections: List[Connection]) -> List[dict]:
 		return [
 			{
-				"summary":   c.summary,
+				"summary":   str(c),
 				"time_from": c.time_from,
 				"time_to":   c.time_to,
 				"duration":  c.duration,

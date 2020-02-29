@@ -1,8 +1,10 @@
 from typing import List
 
 
+
 class Step(object):
 	pass
+
 
 
 class WalkStep(Step):
@@ -11,6 +13,7 @@ class WalkStep(Step):
 
 	def __str__(self):
 		return self.text
+
 
 
 class RideStep(Step):
@@ -42,17 +45,15 @@ class RideStep(Step):
 
 
 class Connection(object):
-	def __init__(self, time_from: int = None, time_to: int = None, transfers: int = None, duration: int = 0, summary: str = "", steps: List[Step] = None):
+	def __init__(self, time_from: int = None, time_to: int = None, transfers: int = None, duration: int = 0, steps: List[Step] = None):
 		self.time_from = time_from
 		self.time_to = time_to
 		self.transfers = transfers
 		self.duration = duration
-
-		self.summary = summary
 
 		if steps is None: steps = []
 		self.steps = steps
 
 
 	def __str__(self):
-		return self.summary
+		return f"{self.time_from} - {self.time_to}, {self.duration}"
