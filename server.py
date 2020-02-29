@@ -49,16 +49,12 @@ def argparse(args: str):
 			"help": parser.format_help(),
 		}
 
-	# default n
-	if args.n is None:
-		args.n = 32 if args.stats else 3
-
 	if not 0 < args.n <= 64:
 		return {
 			"error": "number must be in range: 0 < number <= 64"
 		}
 
-	# todo: stats, format
+	# todo: format
 
 	return {
 		"args": {
@@ -67,7 +63,6 @@ def argparse(args: str):
 			"via":    args.via if args.via else None,
 			"num":    args.n,
 			"format": args.f,
-			"stats":  args.stats,
 		},
 		**connections(args.start, args.end, args.via, args.n),  # get the connections
 	}

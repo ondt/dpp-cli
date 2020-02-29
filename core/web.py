@@ -1,4 +1,3 @@
-import datetime
 import json
 import math
 import re
@@ -205,22 +204,6 @@ class DPP:
 			connections.append(connection)
 
 		return connections
-
-
-
-	def stats(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, int, Connection, Connection, datetime.timedelta, datetime.timedelta, datetime.timedelta]:
-		title, connections = self.query_connection(src, dst, via, num)
-
-		durations = [c.duration for c in connections]
-
-		min_time = datetime.timedelta(seconds=min(durations))
-		max_time = datetime.timedelta(seconds=max(durations))
-		avg_time = datetime.timedelta(seconds=round(sum(durations) / len(durations)))
-
-		best_conn = min(connections, key=lambda c: c.duration)
-		worst_conn = max(connections, key=lambda c: c.duration)
-
-		return title, len(connections), best_conn, worst_conn, min_time, max_time, avg_time
 
 
 
