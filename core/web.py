@@ -95,6 +95,21 @@ class DPP:
 
 
 
+	def pdf(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3, show_progress: bool = False) -> bytes:
+		from_stop = self.normalize(from_stop)
+		to_stop = self.normalize(to_stop)
+		via_stop = self.normalize(via_stop)
+
+		tree = self._get_connections_page_tree(from_stop, to_stop, via_stop, num, show_progress)
+
+		pdf_button = tree.cssselect("form")[1]  # second form tag
+		next_url = pdf_button.attrib["action"]
+		res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")
+
+		return res.content
+
+
+
 	def _get_connections_page_tree(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3, show_progress: bool = False) -> html.HtmlElement:
 		form = {
 			**self.asp_current_state,
