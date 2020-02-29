@@ -83,7 +83,137 @@ class DPP:
 
 
 
-	def query_connection(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
+	def query_connection(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
+		from_stop = self.normalize(from_stop)
+		to_stop = self.normalize(to_stop)
+		via_stop = self.normalize(via_stop)
+
+		tree = self._get_connections_page_tree(from_stop, to_stop, via_stop, num)
+		connections = self._parse_connections(tree)
+
+		title = f"Spojení: {from_stop} - {to_stop}{'' if not via_stop else f' přes {via_stop}'}"
+		return title, connections[:num]
+
+
+
+	def _get_connections_page_tree(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3) -> html.HtmlElement:
+		form = {
+			**self.asp_current_state,
+			"ctlFrom$txtObject":     from_stop,
+			"ctlVia$txtObject":      via_stop,
+			"ctlTo$txtObject":       to_stop,
+
+			"ctlFrom$txtSearchMode": "0",
+			"ctlVia$txtSearchMode":  "0",
+			"ctlTo$txtSearchMode":   "0",
+
+			# "txtDate":                     "29.02.2020",
+			# "txtTime":                     "12:30",
+
+			"Direction":             "optDeparture",
+			"cmdSearch":             "",
+		}
+		tree = None
+		connections_received = 0
+		try:
+			cursor.hide()
+			print(f"loading... 0% ", end="\r")
+
+			while connections_received < num:
+				if connections_received == 0:
+					res = self.http.post("https://spojeni.dpp.cz/", form)  # the 1st request
+				else:
+					button = tree.cssselect("#ctlButtons a[title='zobrazit následující spoje']")  # no následující for the next day
+					if not button:
+						break
+
+					next_url = button[0].attrib["href"]
+					res = self.http.post(f"http://spojeni.dpp.cz/{next_url}")  # the chained requests
+
+				assert "Vyskytl se problém" not in res.text
+				assert "frmResult" in res.text, "Unknown response received."
+
+				tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # the last one will remain
+				connections_received = len(tree.cssselect(".spojeni"))
+				print(f"loading... {round(connections_received / (math.ceil(num / 3) * 3) * 100)}% ", end="\r")
+
+		finally:
+			cursor.show()
+
+		print(" " * 16, end="\r")  # cleanup
+
+		return tree
+
+
+
+	@staticmethod
+	def _parse_connections(tree: html.HtmlElement) -> List[Connection]:
+		result = tree.cssselect("#frmResult")[0]
+		connections: List[Connection] = []
+
+		for conn_box in result.cssselect(".spojeni"):
+			connection = Connection()
+
+			trip_time = conn_box.cssselect(".LineTrack-tripTime")[0].text_content().strip()
+			connection.time_from, connection.time_to = trip_time.split("–")
+			connection.duration = conn_box.cssselect("strong")[1].text_content().strip()  # the second strong
+
+			steps_tbody = conn_box.cssselect("table.LineTrack-connections > tbody")[0]
+			for table_row in steps_tbody.getchildren():
+				if len(table_row) == 0:
+					continue
+
+				vehicle_element, substeps = table_row
+
+				assert len(substeps) in {1, 2}
+
+				if len(substeps) == 1:  # ul (RideStep)
+					# parse the vehicle
+					vehicle_type = vehicle_element.cssselect("svg > use")[0].attrib["xlink:href"].split("-")[-2]
+					vehicle = vehicle_element.cssselect("strong")[0].text_content().strip()
+
+					ul = substeps.cssselect("ul")[0]
+					li = ul.getchildren()
+
+					things = []
+					for item in li:
+						stop_time = item.cssselect(".LineTrack-stopTime")[0].text_content().strip()
+						stop_info = item.cssselect(".LineTrack-stopInfo")[0].text_content().strip()
+
+						for a in stop_time.split():
+							things.append((a, stop_info))
+
+					assert len(things) % 2 == 0  # even
+					things = iter(things)
+
+					for x in things:
+						y = next(things)
+						connection.steps.append(RideStep(
+							vehicle_type=vehicle_type,
+							vehicle=vehicle,
+							start_time=x[0],
+							end_time=y[0],
+							start_place=x[1],
+							end_place=y[1],
+						))
+						print(connection.steps[-1])
+						pass
+
+
+				else:  # div, div (WalkStep)
+					connection.steps.append(WalkStep(
+						text=substeps.cssselect("i")[0].text_content().strip().lower()
+					))
+					print(connection.steps[-1])
+					pass
+
+			connections.append(connection)
+
+		return connections
+
+
+
+	def query_connection_old(self, src: str, dst: str, via: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
 		src = self.normalize(src.replace("_", " "))
 		dst = self.normalize(dst.replace("_", " "))
 
