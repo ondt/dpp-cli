@@ -41,7 +41,9 @@ class RideStep(Step):
 			if "C" in self.vehicle:
 				color = "\033[31m"  # red
 
-		return f"{color}{self.vehicle:<14} {self.start_time:0>5} - {self.end_time:0>5}       {self.start_place} --> {self.end_place}\033[0m"  # todo zvyraznit start a end
+		veh = f"{self.vehicle_type.title()} {self.vehicle}"
+		return f"{color}{veh:<14} {self.start_time:0>5} - {self.end_time:0>5}       {self.start_place} --> {self.end_place}\033[0m"  # todo zvyraznit start a end
+
 
 
 class Connection(object):
