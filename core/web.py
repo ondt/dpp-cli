@@ -82,12 +82,12 @@ class DPP:
 
 
 
-	def query_connection(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3) -> Tuple[str, List[Connection]]:
+	def query_connection(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3, show_progress: bool = False) -> Tuple[str, List[Connection]]:
 		from_stop = self.normalize(from_stop)
 		to_stop = self.normalize(to_stop)
 		via_stop = self.normalize(via_stop)
 
-		tree = self._get_connections_page_tree(from_stop, to_stop, via_stop, num)
+		tree = self._get_connections_page_tree(from_stop, to_stop, via_stop, num, show_progress)
 		connections = self._parse_connections(tree)
 
 		title = f"Spojení: {from_stop} - {to_stop}{'' if not via_stop else f' přes {via_stop}'}"
@@ -95,7 +95,7 @@ class DPP:
 
 
 
-	def _get_connections_page_tree(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3) -> html.HtmlElement:
+	def _get_connections_page_tree(self, from_stop: str, to_stop: str, via_stop: str = "", num: int = 3, show_progress: bool = False) -> html.HtmlElement:
 		form = {
 			**self.asp_current_state,
 			"ctlFrom$txtObject":     from_stop,
@@ -116,7 +116,7 @@ class DPP:
 		connections_received = 0
 		try:
 			cursor.hide()
-			print(f"loading... 0% ", end="\r")
+			if show_progress: print(f"loading... 0% ", end="\r")
 
 			while connections_received < num:
 				if connections_received == 0:
@@ -134,12 +134,12 @@ class DPP:
 
 				tree = html.fromstring(res.content, parser=html.HTMLParser(encoding=res.encoding))  # the last one will remain
 				connections_received = len(tree.cssselect(".spojeni"))
-				print(f"loading... {round(connections_received / (math.ceil(num / 3) * 3) * 100)}% ", end="\r")
+				if show_progress: print(f"loading... {round(connections_received / (math.ceil(num / 3) * 3) * 100)}% ", end="\r")
 
 		finally:
 			cursor.show()
 
-		print(" " * 16, end="\r")  # cleanup
+		if show_progress: print(" " * 16, end="\r")  # cleanup
 
 		return tree
 
