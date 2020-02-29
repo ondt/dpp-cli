@@ -77,7 +77,8 @@ class DPP:
 
 
 	def normalize(self, query: str):
-		results = self.autocomplete(query)
+		if not query: return ""
+		results = self.autocomplete(query.replace("_", " "))
 		return results[0] if len(results) > 0 else query  # todo: exception
 
 
