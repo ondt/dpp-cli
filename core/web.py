@@ -13,15 +13,17 @@ from core.models import Connection, RideStep, WalkStep
 
 
 
-class DPP(object):
+class DPP:
 	http = requests.session()
 	asp_current_state = {}
 	idoskey = ""
 
+
 	def __init__(self):
-		res = self.http.get("http://spojeni.dpp.cz/")
+		res = self.http.get("https://spojeni.dpp.cz/")
 		self.remember_asp_state(res)  # save the asp tags
 		self.idoskey = re.search("var sIDOSKey='(.*)';", res.text).group(1)  # save the idoskey  # var sIDOSKey='<key>';
+
 
 
 	def remember_asp_state(self, res):
@@ -29,6 +31,7 @@ class DPP(object):
 
 		for x in tree.cssselect('input[name^=__]'):  # all the asp tags
 			self.asp_current_state[x.name] = x.value
+
 
 
 	def autocomplete(self, query: str):
