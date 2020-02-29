@@ -190,7 +190,7 @@ class DPP:
 						y = next(things)
 						connection.steps.append(RideStep(
 							vehicle_type=vehicle_type,
-							vehicle=vehicle,
+							vehicle_line=vehicle,
 							start_time=x[0],
 							end_time=y[0],
 							start_place=x[1],
@@ -251,7 +251,7 @@ class DPP:
 						"type":        "ride",
 						"vehicle":     {
 							"type": s.vehicle_type,
-							"line": s.vehicle,
+							"line": s.vehicle_line,
 						},
 						"start_time":  s.start_time,
 						"start_place": s.start_place,

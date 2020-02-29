@@ -17,9 +17,9 @@ class WalkStep(Step):
 
 
 class RideStep(Step):
-	def __init__(self, vehicle_type: str = "", vehicle: str = "", start_time: str = "", end_time: str = "", start_place: str = "", end_place: str = ""):
+	def __init__(self, vehicle_type: str = "", vehicle_line: str = "", start_time: str = "", end_time: str = "", start_place: str = "", end_place: str = ""):
 		self.vehicle_type = vehicle_type
-		self.vehicle = vehicle
+		self.vehicle_line = vehicle_line
 		self.start_time = start_time
 		self.end_time = end_time
 		self.start_place = start_place
@@ -34,15 +34,15 @@ class RideStep(Step):
 		if self.vehicle_type == "tram":
 			color = "\033[91m"  # red
 		if self.vehicle_type == "metro":
-			if "A" in self.vehicle:
+			if "A" in self.vehicle_line:
 				color = "\033[32m"  # green
-			if "B" in self.vehicle:
+			if "B" in self.vehicle_line:
 				color = "\033[33m"  # yellow
-			if "C" in self.vehicle:
+			if "C" in self.vehicle_line:
 				color = "\033[31m"  # red
 
-		veh = f"{self.vehicle_type.title()} {self.vehicle}"
-		return f"{color}{veh:<14} {self.start_time:0>5} - {self.end_time:0>5}       {self.start_place} --> {self.end_place}\033[0m"  # todo zvyraznit start a end
+		vehicle = f"{self.vehicle_type.title()} {self.vehicle_line}"
+		return f"{color}{vehicle:<14} {self.start_time:0>5} - {self.end_time:0>5}       {self.start_place} --> {self.end_place}\033[0m"  # todo zvyraznit start a end
 
 
 
