@@ -231,16 +231,16 @@ class DPP:
 
 	@staticmethod
 	def render_conn2str(connections: List[Connection]):
-		output = ""
+		output = []
 		for connection in connections:
-			output += f"\033[1m{connection}\033[0m\n"
+			output.append(f"\033[1m{connection}\033[0m\n")
 
 			for step in connection.steps:
-				output += f"\t{step}\n"
+				output.append(f"\t{step}\n")
 
-			output += "\n"
+			output.append("\n")
 
-		return output
+		return "".join(output)
 
 
 
