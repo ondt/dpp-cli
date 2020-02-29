@@ -196,16 +196,11 @@ class DPP:
 							start_place=x[1],
 							end_place=y[1],
 						))
-						print(connection.steps[-1])
-						pass
 
 
 				else:  # div, div (WalkStep)
-					connection.steps.append(WalkStep(
-						text=substeps.cssselect("i")[0].text_content().strip().lower()
-					))
-					print(connection.steps[-1])
-					pass
+					text = substeps.cssselect("i")[0].text_content().strip().lower()
+					connection.steps.append(WalkStep(text))
 
 			connections.append(connection)
 
