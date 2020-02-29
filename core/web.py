@@ -168,10 +168,6 @@ class DPP:
 				assert len(substeps) in {1, 2}
 
 				if len(substeps) == 1:  # ul (RideStep)
-					# parse the vehicle
-					vehicle_type = vehicle_element.cssselect("svg > use")[0].attrib["xlink:href"].split("-")[-2]
-					vehicle = vehicle_element.cssselect("strong")[0].text_content().strip()
-
 					ul = substeps.cssselect("ul")[0]
 					li = ul.getchildren()
 
@@ -186,7 +182,11 @@ class DPP:
 					assert len(things) % 2 == 0  # even
 					things = iter(things)
 
-					for x in things:
+					for index, x in enumerate(things):
+						# parse the vehicle
+						vehicle_type = vehicle_element.cssselect("svg > use")[index].attrib["xlink:href"].split("-")[-2]
+						vehicle = vehicle_element.cssselect("strong")[index].text_content().strip()
+
 						y = next(things)
 						connection.steps.append(RideStep(
 							vehicle_type=vehicle_type,
