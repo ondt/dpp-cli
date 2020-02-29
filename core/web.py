@@ -36,8 +36,7 @@ class DPP:
 
 	def autocomplete(self, query: str):
 		headers = {
-			"Content-Type": "application/json; charset=UTF-8",
-			"idoskey":      self.idoskey,
+			"idoskey": self.idoskey,
 		}
 
 		body = {
@@ -51,10 +50,30 @@ class DPP:
 			"iTrCatSelected":   "",
 		}
 
-		res = self.http.post("http://spojeni.dpp.cz/AJAXService.asmx/SearchTimetableObjects", data=json.dumps(body), headers=headers)
+		res = self.http.post("https://spojeni.dpp.cz/AJAXService.asmx/SearchTimetableObjects", json=body, headers=headers)
 
-		results = json.loads(res.text)["d"]
+		results = res.json()["d"]
 		return [r["oItem"]["sName"] for r in results] if results else []
+
+
+
+	def autocomplete_alt(self, query: str):
+		params = {
+			"q":                f"\"{query}\"",
+			"limit":            "20",
+			"timestamp":        str(round(time.time() * 1000)),
+			"selectedTT":       "\"PID\"",
+			"bindElementValue": "",
+			"iLang":            "\"CZECH\"",
+			"bCoor":            "false",  # gives some coordinates
+			"format":           "json",
+		}
+
+		res = self.http.get("https://spojeni.dpp.cz/AJAXService.asmx/SearchTimetableObjectsJSONP", params=params)
+
+		results = json.loads(res.text[1:-2])["d"]  # (<content>);
+		return [r["oItem"]["sName"] for r in results] if results else []
+
 
 
 	def normalize(self, query: str):
