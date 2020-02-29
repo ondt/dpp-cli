@@ -28,12 +28,12 @@ if __name__ == '__main__':
 		args.n = 32 if args.stats else 3
 
 	if not args.stats:
-		title, connections = dpp.query_connection(src=args.start, dst=args.end, via=args.via, num=args.n)
+		title, connections = dpp.query_connection(from_stop=args.start, to_stop=args.end, via_stop=args.via, num=args.n)
 
 		print(title)
 		print()
 
-		print(dpp.render_conn2str(connections))
+		print(dpp.connections_to_str(connections))
 
 
 	else:

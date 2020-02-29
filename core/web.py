@@ -225,7 +225,7 @@ class DPP:
 
 
 	@staticmethod
-	def render_conn2str(connections: List[Connection]):
+	def connections_to_str(connections: List[Connection]):
 		output = []
 		for connection in connections:
 			output.append(f"\033[1m{connection}\033[0m\n")
@@ -240,7 +240,7 @@ class DPP:
 
 
 	@staticmethod
-	def render_conn2json(connections: List[Connection]) -> List[dict]:
+	def connections_to_json(connections: List[Connection]) -> List[dict]:
 		return [
 			{
 				"summary":   str(c),

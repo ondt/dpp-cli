@@ -25,13 +25,13 @@ def connections(start: str, end: str, via: str = "", num: int = 3):
 	dpp = DPP()
 
 	try:
-		title, conns = dpp.query_connection(src=start, dst=end, via=via, num=num)
+		title, conns = dpp.query_connection(from_stop=start, to_stop=end, via_stop=via, num=num)
 	except AssertionError:
 		title, conns = "No connections found", []
 
 	return {
 		"title":       title,
-		"connections": dpp.render_conn2json(conns),
+		"connections": dpp.connections_to_json(conns),
 	}
 
 
